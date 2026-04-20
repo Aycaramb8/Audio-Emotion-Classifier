@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Emotion Classifier by Theon</title>
+<title>Audio Emotion Classifier by Theon</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -3089,7 +3089,7 @@ vertical-align: -.125em;
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Emotion Classifier by Theon</h1>
+<h1 class="title">Audio Emotion Classifier by Theon</h1>
 </div>
 
 
@@ -3367,48 +3367,47 @@ female    3512
 Name: count, dtype: int64</code></pre>
 </div>
 </div>
-<div id="34612554" class="cell" data-execution_count="6">
+<div id="34612554" class="cell">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Downsample Crema-D to balance training data</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>target_per_class <span class="op">=</span> {</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="dv">0</span>: <span class="dv">0</span>,  <span class="co"># angry</span></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>: <span class="dv">900</span>,  <span class="co"># disgust</span></span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="dv">2</span>: <span class="dv">700</span>,  <span class="co"># fear</span></span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="dv">3</span>: <span class="dv">450</span>,  <span class="co"># happy</span></span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="dv">4</span>: <span class="dv">0</span>,  <span class="co"># neutral</span></span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    <span class="dv">5</span>: <span class="dv">300</span>   <span class="co"># sad</span></span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>balanced_data <span class="op">=</span> []</span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> label <span class="kw">in</span> <span class="bu">sorted</span>(df[<span class="st">&quot;label&quot;</span>].unique()):</span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    df_label <span class="op">=</span> df[df[<span class="st">&quot;label&quot;</span>] <span class="op">==</span> label]</span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    target_total <span class="op">=</span> target_per_class[label]</span>
-<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    target_gender <span class="op">=</span> target_total <span class="op">//</span> <span class="dv">5</span></span>
-<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    df_male <span class="op">=</span> df_label[df_label[<span class="st">&quot;sex&quot;</span>] <span class="op">==</span> <span class="st">&quot;male&quot;</span>]</span>
-<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    df_female <span class="op">=</span> df_label[df_label[<span class="st">&quot;sex&quot;</span>] <span class="op">==</span> <span class="st">&quot;female&quot;</span>]</span>
-<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span>(df_male) <span class="op">&lt;</span> target_gender <span class="kw">or</span> <span class="bu">len</span>(df_female) <span class="op">&lt;</span> target_gender:</span>
-<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f&quot;Warning: Not enough samples for label </span><span class="sc">{</span>label<span class="sc">}</span><span class="ss">&quot;</span>)</span>
-<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>        <span class="cf">continue</span></span>
-<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Also balance male and female</span></span>
-<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>    df_male_sampled <span class="op">=</span> df_male.sample(n<span class="op">=</span>target_gender<span class="op">*</span><span class="dv">3</span>, random_state<span class="op">=</span><span class="dv">42</span>)</span>
-<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>    df_female_sampled <span class="op">=</span> df_female.sample(n<span class="op">=</span>target_gender<span class="op">*</span><span class="dv">2</span>, random_state<span class="op">=</span><span class="dv">42</span>)</span>
-<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>    balanced_data.append(df_male_sampled)</span>
-<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>    balanced_data.append(df_female_sampled)</span>
-<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.concat(balanced_data).reset_index(drop<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a><span class="co"># Check</span></span>
-<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;</span><span class="ch">\n</span><span class="st">After balancing:&quot;</span>)</span>
-<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df.head())</span>
-<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df[<span class="st">&quot;label&quot;</span>].value_counts())</span>
-<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df[<span class="st">&quot;sex&quot;</span>].value_counts())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>target_per_class <span class="op">=</span> {</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="dv">0</span>: <span class="dv">0</span>,  <span class="co"># angry</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>: <span class="dv">900</span>,  <span class="co"># disgust</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="dv">2</span>: <span class="dv">700</span>,  <span class="co"># fear</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="dv">3</span>: <span class="dv">450</span>,  <span class="co"># happy</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="dv">4</span>: <span class="dv">0</span>,  <span class="co"># neutral</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="dv">5</span>: <span class="dv">300</span>   <span class="co"># sad</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>balanced_data <span class="op">=</span> []</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> label <span class="kw">in</span> <span class="bu">sorted</span>(df[<span class="st">&quot;label&quot;</span>].unique()):</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    df_label <span class="op">=</span> df[df[<span class="st">&quot;label&quot;</span>] <span class="op">==</span> label]</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    target_total <span class="op">=</span> target_per_class[label]</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    target_gender <span class="op">=</span> target_total <span class="op">//</span> <span class="dv">5</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    df_male <span class="op">=</span> df_label[df_label[<span class="st">&quot;sex&quot;</span>] <span class="op">==</span> <span class="st">&quot;male&quot;</span>]</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    df_female <span class="op">=</span> df_label[df_label[<span class="st">&quot;sex&quot;</span>] <span class="op">==</span> <span class="st">&quot;female&quot;</span>]</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span>(df_male) <span class="op">&lt;</span> target_gender <span class="kw">or</span> <span class="bu">len</span>(df_female) <span class="op">&lt;</span> target_gender:</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f&quot;Warning: Not enough samples for label </span><span class="sc">{</span>label<span class="sc">}</span><span class="ss">&quot;</span>)</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">continue</span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Also balance male and female</span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>    df_male_sampled <span class="op">=</span> df_male.sample(n<span class="op">=</span>target_gender<span class="op">*</span><span class="dv">3</span>, random_state<span class="op">=</span><span class="dv">42</span>)</span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>    df_female_sampled <span class="op">=</span> df_female.sample(n<span class="op">=</span>target_gender<span class="op">*</span><span class="dv">2</span>, random_state<span class="op">=</span><span class="dv">42</span>)</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>    balanced_data.append(df_male_sampled)</span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>    balanced_data.append(df_female_sampled)</span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.concat(balanced_data).reset_index(drop<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a><span class="co"># Check</span></span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;</span><span class="ch">\n</span><span class="st">After balancing:&quot;</span>)</span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df.head())</span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df[<span class="st">&quot;label&quot;</span>].value_counts())</span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df[<span class="st">&quot;sex&quot;</span>].value_counts())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 After balancing:
@@ -3433,7 +3432,7 @@ Name: count, dtype: int64</code></pre>
 </section>
 <section id="tess" class="level2">
 <h2 class="anchored" data-anchor-id="tess">Tess</h2>
-<p>2800 audio files in total. A set of 200 target words was spoken in the carrier phrase “Say the word …’ by two actresses. Recordings were made of the set portraying each of seven emotions (anger, disgust, fear, happiness, pleasant surprise, sadness, and neutral).</p>
+<p>2800 audio files in total. A set of 200 target words was spoken in the carrier phrase “Say the word …” by two actresses. Recordings were made of the set portraying each of seven emotions (anger, disgust, fear, happiness, pleasant surprise, sadness, and neutral).</p>
 <div id="b9011b33" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>TESS <span class="op">=</span> <span class="st">&#39;./data/TESS/&#39;</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>tess_dir_list <span class="op">=</span> os.listdir(TESS)</span>
@@ -4057,7 +4056,7 @@ Name: count, dtype: int64</code></pre>
 <ul>
 <li>Ryerson Audio-Visual Database of Emotional Speech and Song (RAVDESS)</li>
 </ul>
-<p>Song version of RAVDESS</p>
+<p>Song version of RAVDESS. But note that there is no disgust in RAVDESS Song.</p>
 <div id="32f129f4" class="cell" data-execution_count="15">
 <div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>RAVDESS_song <span class="op">=</span> <span class="st">&#39;./data/RAV_song/&#39;</span></span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>RAVDESS_song_directory_list <span class="op">=</span> os.listdir(RAVDESS_song)</span>
@@ -4602,8 +4601,8 @@ Name: count, dtype: int64</code></pre>
 </section>
 <section id="create-dataloaders" class="level2">
 <h2 class="anchored" data-anchor-id="create-dataloaders">Create DataLoaders</h2>
-<div id="215a6fd5" class="cell" data-execution_count="27">
-<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>train_dataset <span class="op">=</span> RetrieveDataset(train_df, augment<span class="op">=</span><span class="va">True</span>)  <span class="co"># ON</span></span>
+<div id="215a6fd5" class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>train_dataset <span class="op">=</span> RetrieveDataset(train_df, augment<span class="op">=</span><span class="va">True</span>)  <span class="co"># Data Augmentation ON</span></span>
 <span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>val_dataset <span class="op">=</span> RetrieveDataset(val_df, augment<span class="op">=</span><span class="va">False</span>)  <span class="co"># OFF</span></span>
 <span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>test_dataset <span class="op">=</span> RetrieveDataset(test_df, augment<span class="op">=</span><span class="va">False</span>)  <span class="co"># OFF</span></span>
 <span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -4656,7 +4655,7 @@ torch.Size([64])</code></pre>
 <span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.norm <span class="op">=</span> nn.GroupNorm(<span class="dv">1</span>, dim)</span>
 <span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Pointwise MLP (simulate transformer FFN)</span></span>
-<span id="cb44-12"><a href="#cb44-12" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.pwconv1 <span class="op">=</span> nn.Conv2d(dim, <span class="dv">2</span> <span class="op">*</span> dim, <span class="dv">1</span>)   <span class="co"># 2× expansion so lower capacity(faster training)</span></span>
+<span id="cb44-12"><a href="#cb44-12" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.pwconv1 <span class="op">=</span> nn.Conv2d(dim, <span class="dv">2</span> <span class="op">*</span> dim, <span class="dv">1</span>)   <span class="co"># 2x expansion so lower capacity(faster training)</span></span>
 <span id="cb44-13"><a href="#cb44-13" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.act <span class="op">=</span> nn.GELU()</span>
 <span id="cb44-14"><a href="#cb44-14" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.pwconv2 <span class="op">=</span> nn.Conv2d(<span class="dv">2</span> <span class="op">*</span> dim, dim, <span class="dv">1</span>)</span>
 <span id="cb44-15"><a href="#cb44-15" aria-hidden="true" tabindex="-1"></a></span>
@@ -4796,101 +4795,101 @@ torch.Size([64])</code></pre>
 </div>
 </div>
 <div id="1a694ea0" class="cell">
-<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="co"># best_val_loss = float(&quot;inf&quot;)</span></span>
-<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a><span class="co"># patience_counter = 0</span></span>
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>best_val_loss <span class="op">=</span> <span class="bu">float</span>(<span class="st">&quot;inf&quot;</span>)</span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>patience_counter <span class="op">=</span> <span class="dv">0</span></span>
 <span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a><span class="co"># train_losses = []</span></span>
-<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a><span class="co"># val_losses = []</span></span>
-<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a><span class="co"># train_accs = []</span></span>
-<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a><span class="co"># val_accs = []</span></span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>train_losses <span class="op">=</span> []</span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>val_losses <span class="op">=</span> []</span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>train_accs <span class="op">=</span> []</span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>val_accs <span class="op">=</span> []</span>
 <span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a><span class="co"># for epoch in range(num_epochs):</span></span>
+<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(num_epochs):</span>
 <span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a><span class="co">#     # -----------</span></span>
-<span id="cb48-12"><a href="#cb48-12" aria-hidden="true" tabindex="-1"></a><span class="co">#     # Training</span></span>
-<span id="cb48-13"><a href="#cb48-13" aria-hidden="true" tabindex="-1"></a><span class="co">#     # -----------</span></span>
-<span id="cb48-14"><a href="#cb48-14" aria-hidden="true" tabindex="-1"></a><span class="co">#     model.train()</span></span>
-<span id="cb48-15"><a href="#cb48-15" aria-hidden="true" tabindex="-1"></a><span class="co">#     running_loss = 0</span></span>
-<span id="cb48-16"><a href="#cb48-16" aria-hidden="true" tabindex="-1"></a><span class="co">#     correct = 0</span></span>
-<span id="cb48-17"><a href="#cb48-17" aria-hidden="true" tabindex="-1"></a><span class="co">#     total = 0</span></span>
+<span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># -----------</span></span>
+<span id="cb48-12"><a href="#cb48-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Training</span></span>
+<span id="cb48-13"><a href="#cb48-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># -----------</span></span>
+<span id="cb48-14"><a href="#cb48-14" aria-hidden="true" tabindex="-1"></a>    model.train()</span>
+<span id="cb48-15"><a href="#cb48-15" aria-hidden="true" tabindex="-1"></a>    running_loss <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb48-16"><a href="#cb48-16" aria-hidden="true" tabindex="-1"></a>    correct <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb48-17"><a href="#cb48-17" aria-hidden="true" tabindex="-1"></a>    total <span class="op">=</span> <span class="dv">0</span></span>
 <span id="cb48-18"><a href="#cb48-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-19"><a href="#cb48-19" aria-hidden="true" tabindex="-1"></a><span class="co">#     for x, y in train_loader:</span></span>
-<span id="cb48-20"><a href="#cb48-20" aria-hidden="true" tabindex="-1"></a><span class="co">#         x, y = x.to(device), y.to(device)</span></span>
+<span id="cb48-19"><a href="#cb48-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> x, y <span class="kw">in</span> train_loader:</span>
+<span id="cb48-20"><a href="#cb48-20" aria-hidden="true" tabindex="-1"></a>        x, y <span class="op">=</span> x.to(device), y.to(device)</span>
 <span id="cb48-21"><a href="#cb48-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-22"><a href="#cb48-22" aria-hidden="true" tabindex="-1"></a><span class="co">#         optimizer.zero_grad()</span></span>
+<span id="cb48-22"><a href="#cb48-22" aria-hidden="true" tabindex="-1"></a>        optimizer.zero_grad()</span>
 <span id="cb48-23"><a href="#cb48-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-24"><a href="#cb48-24" aria-hidden="true" tabindex="-1"></a><span class="co">#         outputs = model(x)</span></span>
-<span id="cb48-25"><a href="#cb48-25" aria-hidden="true" tabindex="-1"></a><span class="co">#         loss = criterion(outputs, y)</span></span>
+<span id="cb48-24"><a href="#cb48-24" aria-hidden="true" tabindex="-1"></a>        outputs <span class="op">=</span> model(x)</span>
+<span id="cb48-25"><a href="#cb48-25" aria-hidden="true" tabindex="-1"></a>        loss <span class="op">=</span> criterion(outputs, y)</span>
 <span id="cb48-26"><a href="#cb48-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-27"><a href="#cb48-27" aria-hidden="true" tabindex="-1"></a><span class="co">#         loss.backward()</span></span>
+<span id="cb48-27"><a href="#cb48-27" aria-hidden="true" tabindex="-1"></a>        loss.backward()</span>
 <span id="cb48-28"><a href="#cb48-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-29"><a href="#cb48-29" aria-hidden="true" tabindex="-1"></a><span class="co">#         torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)  # Gradient clipping</span></span>
+<span id="cb48-29"><a href="#cb48-29" aria-hidden="true" tabindex="-1"></a>        torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm<span class="op">=</span><span class="fl">1.0</span>)  <span class="co"># Gradient clipping</span></span>
 <span id="cb48-30"><a href="#cb48-30" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb48-31"><a href="#cb48-31" aria-hidden="true" tabindex="-1"></a><span class="co">#         optimizer.step()</span></span>
+<span id="cb48-31"><a href="#cb48-31" aria-hidden="true" tabindex="-1"></a>        optimizer.step()</span>
 <span id="cb48-32"><a href="#cb48-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-33"><a href="#cb48-33" aria-hidden="true" tabindex="-1"></a><span class="co">#         running_loss += loss.item() * x.size(0)</span></span>
+<span id="cb48-33"><a href="#cb48-33" aria-hidden="true" tabindex="-1"></a>        running_loss <span class="op">+=</span> loss.item() <span class="op">*</span> x.size(<span class="dv">0</span>)</span>
 <span id="cb48-34"><a href="#cb48-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-35"><a href="#cb48-35" aria-hidden="true" tabindex="-1"></a><span class="co">#         _, predicted = torch.max(outputs, 1)</span></span>
+<span id="cb48-35"><a href="#cb48-35" aria-hidden="true" tabindex="-1"></a>        _, predicted <span class="op">=</span> torch.<span class="bu">max</span>(outputs, <span class="dv">1</span>)</span>
 <span id="cb48-36"><a href="#cb48-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-37"><a href="#cb48-37" aria-hidden="true" tabindex="-1"></a><span class="co">#         correct += (predicted == y).sum().item()</span></span>
-<span id="cb48-38"><a href="#cb48-38" aria-hidden="true" tabindex="-1"></a><span class="co">#         total += y.size(0)</span></span>
+<span id="cb48-37"><a href="#cb48-37" aria-hidden="true" tabindex="-1"></a>        correct <span class="op">+=</span> (predicted <span class="op">==</span> y).<span class="bu">sum</span>().item()</span>
+<span id="cb48-38"><a href="#cb48-38" aria-hidden="true" tabindex="-1"></a>        total <span class="op">+=</span> y.size(<span class="dv">0</span>)</span>
 <span id="cb48-39"><a href="#cb48-39" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-40"><a href="#cb48-40" aria-hidden="true" tabindex="-1"></a><span class="co">#     # Record loss and accuracy</span></span>
-<span id="cb48-41"><a href="#cb48-41" aria-hidden="true" tabindex="-1"></a><span class="co">#     train_loss = running_loss / total</span></span>
-<span id="cb48-42"><a href="#cb48-42" aria-hidden="true" tabindex="-1"></a><span class="co">#     train_acc = correct / total</span></span>
+<span id="cb48-40"><a href="#cb48-40" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Record loss and accuracy</span></span>
+<span id="cb48-41"><a href="#cb48-41" aria-hidden="true" tabindex="-1"></a>    train_loss <span class="op">=</span> running_loss <span class="op">/</span> total</span>
+<span id="cb48-42"><a href="#cb48-42" aria-hidden="true" tabindex="-1"></a>    train_acc <span class="op">=</span> correct <span class="op">/</span> total</span>
 <span id="cb48-43"><a href="#cb48-43" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-44"><a href="#cb48-44" aria-hidden="true" tabindex="-1"></a><span class="co">#     train_losses.append(train_loss)</span></span>
-<span id="cb48-45"><a href="#cb48-45" aria-hidden="true" tabindex="-1"></a><span class="co">#     train_accs.append(train_acc)</span></span>
+<span id="cb48-44"><a href="#cb48-44" aria-hidden="true" tabindex="-1"></a>    train_losses.append(train_loss)</span>
+<span id="cb48-45"><a href="#cb48-45" aria-hidden="true" tabindex="-1"></a>    train_accs.append(train_acc)</span>
 <span id="cb48-46"><a href="#cb48-46" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-47"><a href="#cb48-47" aria-hidden="true" tabindex="-1"></a><span class="co">#     # -----------</span></span>
-<span id="cb48-48"><a href="#cb48-48" aria-hidden="true" tabindex="-1"></a><span class="co">#     # Validation</span></span>
-<span id="cb48-49"><a href="#cb48-49" aria-hidden="true" tabindex="-1"></a><span class="co">#     # -----------</span></span>
-<span id="cb48-50"><a href="#cb48-50" aria-hidden="true" tabindex="-1"></a><span class="co">#     model.eval()</span></span>
-<span id="cb48-51"><a href="#cb48-51" aria-hidden="true" tabindex="-1"></a><span class="co">#     val_running_loss = 0</span></span>
-<span id="cb48-52"><a href="#cb48-52" aria-hidden="true" tabindex="-1"></a><span class="co">#     val_correct = 0</span></span>
-<span id="cb48-53"><a href="#cb48-53" aria-hidden="true" tabindex="-1"></a><span class="co">#     val_total = 0</span></span>
+<span id="cb48-47"><a href="#cb48-47" aria-hidden="true" tabindex="-1"></a>    <span class="co"># -----------</span></span>
+<span id="cb48-48"><a href="#cb48-48" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Validation</span></span>
+<span id="cb48-49"><a href="#cb48-49" aria-hidden="true" tabindex="-1"></a>    <span class="co"># -----------</span></span>
+<span id="cb48-50"><a href="#cb48-50" aria-hidden="true" tabindex="-1"></a>    model.<span class="bu">eval</span>()</span>
+<span id="cb48-51"><a href="#cb48-51" aria-hidden="true" tabindex="-1"></a>    val_running_loss <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb48-52"><a href="#cb48-52" aria-hidden="true" tabindex="-1"></a>    val_correct <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb48-53"><a href="#cb48-53" aria-hidden="true" tabindex="-1"></a>    val_total <span class="op">=</span> <span class="dv">0</span></span>
 <span id="cb48-54"><a href="#cb48-54" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-55"><a href="#cb48-55" aria-hidden="true" tabindex="-1"></a><span class="co">#     with torch.no_grad():</span></span>
-<span id="cb48-56"><a href="#cb48-56" aria-hidden="true" tabindex="-1"></a><span class="co">#         for x, y in val_loader:</span></span>
-<span id="cb48-57"><a href="#cb48-57" aria-hidden="true" tabindex="-1"></a><span class="co">#             x, y = x.to(device), y.to(device)</span></span>
+<span id="cb48-55"><a href="#cb48-55" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> torch.no_grad():</span>
+<span id="cb48-56"><a href="#cb48-56" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> x, y <span class="kw">in</span> val_loader:</span>
+<span id="cb48-57"><a href="#cb48-57" aria-hidden="true" tabindex="-1"></a>            x, y <span class="op">=</span> x.to(device), y.to(device)</span>
 <span id="cb48-58"><a href="#cb48-58" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-59"><a href="#cb48-59" aria-hidden="true" tabindex="-1"></a><span class="co">#             outputs = model(x)</span></span>
-<span id="cb48-60"><a href="#cb48-60" aria-hidden="true" tabindex="-1"></a><span class="co">#             loss = criterion(outputs, y)</span></span>
+<span id="cb48-59"><a href="#cb48-59" aria-hidden="true" tabindex="-1"></a>            outputs <span class="op">=</span> model(x)</span>
+<span id="cb48-60"><a href="#cb48-60" aria-hidden="true" tabindex="-1"></a>            loss <span class="op">=</span> criterion(outputs, y)</span>
 <span id="cb48-61"><a href="#cb48-61" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-62"><a href="#cb48-62" aria-hidden="true" tabindex="-1"></a><span class="co">#             val_running_loss += loss.item() * x.size(0)</span></span>
+<span id="cb48-62"><a href="#cb48-62" aria-hidden="true" tabindex="-1"></a>            val_running_loss <span class="op">+=</span> loss.item() <span class="op">*</span> x.size(<span class="dv">0</span>)</span>
 <span id="cb48-63"><a href="#cb48-63" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-64"><a href="#cb48-64" aria-hidden="true" tabindex="-1"></a><span class="co">#             _, predicted = torch.max(outputs, 1)</span></span>
+<span id="cb48-64"><a href="#cb48-64" aria-hidden="true" tabindex="-1"></a>            _, predicted <span class="op">=</span> torch.<span class="bu">max</span>(outputs, <span class="dv">1</span>)</span>
 <span id="cb48-65"><a href="#cb48-65" aria-hidden="true" tabindex="-1"></a>            </span>
-<span id="cb48-66"><a href="#cb48-66" aria-hidden="true" tabindex="-1"></a><span class="co">#             val_correct += (predicted == y).sum().item()</span></span>
-<span id="cb48-67"><a href="#cb48-67" aria-hidden="true" tabindex="-1"></a><span class="co">#             val_total += y.size(0)</span></span>
+<span id="cb48-66"><a href="#cb48-66" aria-hidden="true" tabindex="-1"></a>            val_correct <span class="op">+=</span> (predicted <span class="op">==</span> y).<span class="bu">sum</span>().item()</span>
+<span id="cb48-67"><a href="#cb48-67" aria-hidden="true" tabindex="-1"></a>            val_total <span class="op">+=</span> y.size(<span class="dv">0</span>)</span>
 <span id="cb48-68"><a href="#cb48-68" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-69"><a href="#cb48-69" aria-hidden="true" tabindex="-1"></a><span class="co">#     # Record loss and accuracy</span></span>
-<span id="cb48-70"><a href="#cb48-70" aria-hidden="true" tabindex="-1"></a><span class="co">#     val_loss = val_running_loss / val_total</span></span>
-<span id="cb48-71"><a href="#cb48-71" aria-hidden="true" tabindex="-1"></a><span class="co">#     val_acc = val_correct / val_total</span></span>
+<span id="cb48-69"><a href="#cb48-69" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Record loss and accuracy</span></span>
+<span id="cb48-70"><a href="#cb48-70" aria-hidden="true" tabindex="-1"></a>    val_loss <span class="op">=</span> val_running_loss <span class="op">/</span> val_total</span>
+<span id="cb48-71"><a href="#cb48-71" aria-hidden="true" tabindex="-1"></a>    val_acc <span class="op">=</span> val_correct <span class="op">/</span> val_total</span>
 <span id="cb48-72"><a href="#cb48-72" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-73"><a href="#cb48-73" aria-hidden="true" tabindex="-1"></a><span class="co">#     val_losses.append(val_loss)</span></span>
-<span id="cb48-74"><a href="#cb48-74" aria-hidden="true" tabindex="-1"></a><span class="co">#     val_accs.append(val_acc)</span></span>
+<span id="cb48-73"><a href="#cb48-73" aria-hidden="true" tabindex="-1"></a>    val_losses.append(val_loss)</span>
+<span id="cb48-74"><a href="#cb48-74" aria-hidden="true" tabindex="-1"></a>    val_accs.append(val_acc)</span>
 <span id="cb48-75"><a href="#cb48-75" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-76"><a href="#cb48-76" aria-hidden="true" tabindex="-1"></a><span class="co">#     scheduler.step(val_loss)  # Learning rate scheduler</span></span>
+<span id="cb48-76"><a href="#cb48-76" aria-hidden="true" tabindex="-1"></a>    scheduler.step(val_loss)  <span class="co"># Learning rate scheduler</span></span>
 <span id="cb48-77"><a href="#cb48-77" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-78"><a href="#cb48-78" aria-hidden="true" tabindex="-1"></a><span class="co">#     print(f&quot;Epoch [{epoch+1}/{num_epochs}]&quot;)</span></span>
-<span id="cb48-79"><a href="#cb48-79" aria-hidden="true" tabindex="-1"></a><span class="co">#     print(f&quot;Train Loss: {train_loss:.4f} | Train Acc: {train_acc:.4f}&quot;)</span></span>
-<span id="cb48-80"><a href="#cb48-80" aria-hidden="true" tabindex="-1"></a><span class="co">#     print(f&quot; Val  Loss: {val_loss:.4f} |  Val  Acc: {val_acc:.4f}&quot;)</span></span>
-<span id="cb48-81"><a href="#cb48-81" aria-hidden="true" tabindex="-1"></a><span class="co">#     print(&quot;-&quot; * 50)</span></span>
+<span id="cb48-78"><a href="#cb48-78" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f&quot;Epoch [</span><span class="sc">{</span>epoch<span class="op">+</span><span class="dv">1</span><span class="sc">}</span><span class="ss">/</span><span class="sc">{</span>num_epochs<span class="sc">}</span><span class="ss">]&quot;</span>)</span>
+<span id="cb48-79"><a href="#cb48-79" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f&quot;Train Loss: </span><span class="sc">{</span>train_loss<span class="sc">:.4f}</span><span class="ss"> | Train Acc: </span><span class="sc">{</span>train_acc<span class="sc">:.4f}</span><span class="ss">&quot;</span>)</span>
+<span id="cb48-80"><a href="#cb48-80" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f&quot; Val  Loss: </span><span class="sc">{</span>val_loss<span class="sc">:.4f}</span><span class="ss"> |  Val  Acc: </span><span class="sc">{</span>val_acc<span class="sc">:.4f}</span><span class="ss">&quot;</span>)</span>
+<span id="cb48-81"><a href="#cb48-81" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">&quot;-&quot;</span> <span class="op">*</span> <span class="dv">50</span>)</span>
 <span id="cb48-82"><a href="#cb48-82" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-83"><a href="#cb48-83" aria-hidden="true" tabindex="-1"></a><span class="co">#     # -----------</span></span>
-<span id="cb48-84"><a href="#cb48-84" aria-hidden="true" tabindex="-1"></a><span class="co">#     # Early Stopping</span></span>
-<span id="cb48-85"><a href="#cb48-85" aria-hidden="true" tabindex="-1"></a><span class="co">#     # -----------</span></span>
-<span id="cb48-86"><a href="#cb48-86" aria-hidden="true" tabindex="-1"></a><span class="co">#     if val_loss &lt; best_val_loss:</span></span>
-<span id="cb48-87"><a href="#cb48-87" aria-hidden="true" tabindex="-1"></a><span class="co">#         best_val_loss = val_loss</span></span>
-<span id="cb48-88"><a href="#cb48-88" aria-hidden="true" tabindex="-1"></a><span class="co">#         patience_counter = 0</span></span>
-<span id="cb48-89"><a href="#cb48-89" aria-hidden="true" tabindex="-1"></a><span class="co">#         torch.save(model.state_dict(), &quot;best_model.pth&quot;)</span></span>
-<span id="cb48-90"><a href="#cb48-90" aria-hidden="true" tabindex="-1"></a><span class="co">#     else:</span></span>
-<span id="cb48-91"><a href="#cb48-91" aria-hidden="true" tabindex="-1"></a><span class="co">#         patience_counter += 1</span></span>
+<span id="cb48-83"><a href="#cb48-83" aria-hidden="true" tabindex="-1"></a>    <span class="co"># -----------</span></span>
+<span id="cb48-84"><a href="#cb48-84" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Early Stopping</span></span>
+<span id="cb48-85"><a href="#cb48-85" aria-hidden="true" tabindex="-1"></a>    <span class="co"># -----------</span></span>
+<span id="cb48-86"><a href="#cb48-86" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> val_loss <span class="op">&lt;</span> best_val_loss:</span>
+<span id="cb48-87"><a href="#cb48-87" aria-hidden="true" tabindex="-1"></a>        best_val_loss <span class="op">=</span> val_loss</span>
+<span id="cb48-88"><a href="#cb48-88" aria-hidden="true" tabindex="-1"></a>        patience_counter <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb48-89"><a href="#cb48-89" aria-hidden="true" tabindex="-1"></a>        torch.save(model.state_dict(), <span class="st">&quot;best_model.pth&quot;</span>)</span>
+<span id="cb48-90"><a href="#cb48-90" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb48-91"><a href="#cb48-91" aria-hidden="true" tabindex="-1"></a>        patience_counter <span class="op">+=</span> <span class="dv">1</span></span>
 <span id="cb48-92"><a href="#cb48-92" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-93"><a href="#cb48-93" aria-hidden="true" tabindex="-1"></a><span class="co">#     if patience_counter &gt;= patience:</span></span>
-<span id="cb48-94"><a href="#cb48-94" aria-hidden="true" tabindex="-1"></a><span class="co">#         print(&quot;Early stopping triggered.&quot;)</span></span>
-<span id="cb48-95"><a href="#cb48-95" aria-hidden="true" tabindex="-1"></a><span class="co">#         break</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb48-93"><a href="#cb48-93" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> patience_counter <span class="op">&gt;=</span> patience:</span>
+<span id="cb48-94"><a href="#cb48-94" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">&quot;Early stopping triggered.&quot;</span>)</span>
+<span id="cb48-95"><a href="#cb48-95" aria-hidden="true" tabindex="-1"></a>        <span class="cf">break</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Epoch [1/200]
 Train Loss: 1.6718 | Train Acc: 0.3119
@@ -4960,23 +4959,23 @@ Early stopping triggered.</code></pre>
 </div>
 </div>
 <div id="3bcffd67" class="cell">
-<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="co"># import matplotlib.pyplot as plt</span></span>
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a><span class="co"># min_val_loss_epoch = val_losses.index(min(val_losses)) + 1</span></span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>min_val_loss_epoch <span class="op">=</span> val_losses.index(<span class="bu">min</span>(val_losses)) <span class="op">+</span> <span class="dv">1</span></span>
 <span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a><span class="co"># # Truncate the data up to the minimum validation loss epoch</span></span>
-<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a><span class="co"># epochs_truncated = range(1, min_val_loss_epoch + 1)</span></span>
-<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a><span class="co"># train_losses_truncated = train_losses[:min_val_loss_epoch]</span></span>
-<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a><span class="co"># val_losses_truncated = val_losses[:min_val_loss_epoch]</span></span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Truncate the data up to the minimum validation loss epoch</span></span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a>epochs_truncated <span class="op">=</span> <span class="bu">range</span>(<span class="dv">1</span>, min_val_loss_epoch <span class="op">+</span> <span class="dv">1</span>)</span>
+<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a>train_losses_truncated <span class="op">=</span> train_losses[:min_val_loss_epoch]</span>
+<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a>val_losses_truncated <span class="op">=</span> val_losses[:min_val_loss_epoch]</span>
 <span id="cb50-9"><a href="#cb50-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb50-10"><a href="#cb50-10" aria-hidden="true" tabindex="-1"></a><span class="co"># plt.figure()</span></span>
-<span id="cb50-11"><a href="#cb50-11" aria-hidden="true" tabindex="-1"></a><span class="co"># plt.plot(epochs_truncated, train_losses_truncated, label=&quot;Train Loss&quot;)</span></span>
-<span id="cb50-12"><a href="#cb50-12" aria-hidden="true" tabindex="-1"></a><span class="co"># plt.plot(epochs_truncated, val_losses_truncated, label=&quot;Validation Loss&quot;)</span></span>
-<span id="cb50-13"><a href="#cb50-13" aria-hidden="true" tabindex="-1"></a><span class="co"># plt.xlabel(&quot;Epoch&quot;)</span></span>
-<span id="cb50-14"><a href="#cb50-14" aria-hidden="true" tabindex="-1"></a><span class="co"># plt.ylabel(&quot;Loss&quot;)</span></span>
-<span id="cb50-15"><a href="#cb50-15" aria-hidden="true" tabindex="-1"></a><span class="co"># plt.title(&quot;Training vs Validation Loss&quot;)</span></span>
-<span id="cb50-16"><a href="#cb50-16" aria-hidden="true" tabindex="-1"></a><span class="co"># plt.legend()</span></span>
-<span id="cb50-17"><a href="#cb50-17" aria-hidden="true" tabindex="-1"></a><span class="co"># plt.show()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb50-10"><a href="#cb50-10" aria-hidden="true" tabindex="-1"></a>plt.figure()</span>
+<span id="cb50-11"><a href="#cb50-11" aria-hidden="true" tabindex="-1"></a>plt.plot(epochs_truncated, train_losses_truncated, label<span class="op">=</span><span class="st">&quot;Train Loss&quot;</span>)</span>
+<span id="cb50-12"><a href="#cb50-12" aria-hidden="true" tabindex="-1"></a>plt.plot(epochs_truncated, val_losses_truncated, label<span class="op">=</span><span class="st">&quot;Validation Loss&quot;</span>)</span>
+<span id="cb50-13"><a href="#cb50-13" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">&quot;Epoch&quot;</span>)</span>
+<span id="cb50-14"><a href="#cb50-14" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">&quot;Loss&quot;</span>)</span>
+<span id="cb50-15"><a href="#cb50-15" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">&quot;Training vs Validation Loss&quot;</span>)</span>
+<span id="cb50-16"><a href="#cb50-16" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
+<span id="cb50-17"><a href="#cb50-17" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -5015,6 +5014,7 @@ Early stopping triggered.</code></pre>
 </section>
 <section id="evaluation-metrics" class="level2">
 <h2 class="anchored" data-anchor-id="evaluation-metrics">Evaluation Metrics</h2>
+<p>Results are evaluated on many levels(emotion, datasets, gender, datasets+emotion, etc.) using classification reports, confusion matrices, and statistics. For detailed explanation, go to the “Results” section of the report(the “paper” pdf or html).</p>
 <div id="d805fe76" class="cell" data-execution_count="38">
 <div class="sourceCode cell-code" id="cb53"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> classification_report, confusion_matrix</span>
 <span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
@@ -5372,7 +5372,7 @@ weighted avg       0.93      0.92      0.92       125
 </code></pre>
 </div>
 </div>
-<div id="0de7f68a" class="cell" data-execution_count="44">
+<div id="0de7f68a" class="cell">
 <div class="sourceCode cell-code" id="cb73"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;</span><span class="ch">\n</span><span class="st">Accuracy by Type + Gender:&quot;</span>)</span>
 <span id="cb73-2"><a href="#cb73-2" aria-hidden="true" tabindex="-1"></a>type_sex_acc <span class="op">=</span> test_results.groupby([<span class="st">&quot;type&quot;</span>, <span class="st">&quot;sex&quot;</span>])[<span class="st">&quot;correct&quot;</span>].mean()</span>
 <span id="cb73-3"><a href="#cb73-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -5400,7 +5400,7 @@ iPartment - female: 0.5660
 iPartment - male: 0.5652</code></pre>
 </div>
 </div>
-<div id="e3ea4643" class="cell" data-execution_count="45">
+<div id="e3ea4643" class="cell">
 <div class="sourceCode cell-code" id="cb75"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;</span><span class="ch">\n</span><span class="st">Accuracy by Type + Emotion:&quot;</span>)</span>
 <span id="cb75-2"><a href="#cb75-2" aria-hidden="true" tabindex="-1"></a>type_emo_acc <span class="op">=</span> test_results.groupby([<span class="st">&quot;type&quot;</span>, <span class="st">&quot;emotion&quot;</span>])[<span class="st">&quot;correct&quot;</span>].mean()</span>
 <span id="cb75-3"><a href="#cb75-3" aria-hidden="true" tabindex="-1"></a></span>
